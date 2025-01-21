@@ -11,7 +11,11 @@ class FileConverterApp:
         # File selection
         self.file_label = tk.Label(root, text="No file selected")
         self.file_label.pack(pady=10)
-
+        # CRF number input
+        self.crf_label = tk.Label(root, text="Enter CRF number (0-51):")
+        self.crf_label.pack(pady=5)
+        self.crf_entry = tk.Entry(root)
+        self.crf_entry.pack(pady=5)
         self.browse_button = tk.Button(root, text="Browse", command=self.browse_file)
         self.browse_button.pack(pady=5)
 
@@ -47,7 +51,12 @@ class FileConverterApp:
             return
 
         # Run ffmpeg in background
-        command = ["ffmpeg", "-i", self.input_file, output_file]
+        crf_value = self.crf_entry.get()
+        if not crf_value.isdigit() or not (0 <= int(crf_value) <= 51):
+            messagebox.showerror("Error", "Invalid CRF value. Please enter a number between 0 and 51.")
+            return
+
+        command = ["ffmpeg", "-i", self.input_file, "-c:v", "libx264", "-crf", crf_value, "-pix_fmt", "yuv422p", output_file]
         try:
             subprocess.run(command, check=True)
             messagebox.showinfo("Success", f"File converted successfully to {output_format.upper()}")
