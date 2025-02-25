@@ -2,7 +2,7 @@ import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 
-def split_video_vertically(video_path, n_cuts):
+def split_video_into_grid(video_path, n_cuts, m_cuts):
     # Get video dimensions using FFmpeg
     command = [
         'ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries',
@@ -15,28 +15,34 @@ def split_video_vertically(video_path, n_cuts):
 
     width, height = map(int, result.stdout.decode().strip().split())
 
-    # Check if width is divisible by n_cuts
+    # Check if width and height are divisible by n_cuts and m_cuts respectively
     if width % n_cuts != 0:
         messagebox.showerror("Error", f"Width {width} is not divisible by {n_cuts}.")
         return
-    
-    # get video_path extension
+    if height % m_cuts != 0:
+        messagebox.showerror("Error", f"Height {height} is not divisible by {m_cuts}.")
+        return
+
+    # Get video file extension
     ext = video_path.split(".")[-1]
 
     cut_width = width // n_cuts
+    cut_height = height // m_cuts
 
-    # Split the video into vertical cuts
+    # Split the video into an n x m grid
     for i in range(n_cuts):
-        output_filename = f"cut_{i + 1}.{ext}"
-        x_offset = i * cut_width
-        filter_str = f"crop={cut_width}:{height}:{x_offset}:0"
-        command = [
-            'ffmpeg', '-i', video_path, '-vf', filter_str, '-c:a', 'copy', output_filename
-        ]
-        result = subprocess.run(command)
-        if result.returncode != 0:
-            messagebox.showerror("Error", f"Failed to split video into cut {i + 1}.")
-            return
+        for j in range(m_cuts):
+            output_filename = f"cut_{i + 1}_{j + 1}.{ext}"
+            x_offset = i * cut_width
+            y_offset = j * cut_height
+            filter_str = f"crop={cut_width}:{cut_height}:{x_offset}:{y_offset}"
+            command = [
+                'ffmpeg', '-i', video_path, '-vf', filter_str, '-c:a', 'copy', output_filename
+            ]
+            result = subprocess.run(command)
+            if result.returncode != 0:
+                messagebox.showerror("Error", f"Failed to split video into cut {i + 1}_{j + 1}.")
+                return
 
     messagebox.showinfo("Success", "Video split successfully.")
 
@@ -47,15 +53,19 @@ def select_video_and_split():
     if not video_path:
         return
 
-    # Prompt the user to enter the number of cuts
+    # Prompt the user to enter the number of vertical and horizontal cuts
     n_cuts = simpledialog.askinteger("Input", "Enter the number of vertical cuts:")
-    
     if n_cuts is None or n_cuts <= 0:
-        messagebox.showerror("Error", "Invalid number of cuts.")
+        messagebox.showerror("Error", "Invalid number of vertical cuts.")
+        return
+
+    m_cuts = simpledialog.askinteger("Input", "Enter the number of horizontal cuts:")
+    if m_cuts is None or m_cuts <= 0:
+        messagebox.showerror("Error", "Invalid number of horizontal cuts.")
         return
 
     # Split the video
-    split_video_vertically(video_path, n_cuts)
+    split_video_into_grid(video_path, n_cuts, m_cuts)
 
 def main():
     # Set up the main application window
