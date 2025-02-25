@@ -1,0 +1,6 @@
+
+
+
+### Requirements
+- ffmpeg
+- python
