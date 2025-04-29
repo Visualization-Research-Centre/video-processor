@@ -23,12 +23,12 @@ class ImageSplitterApp:
     def create_widgets(self):
         # Input File Selection
         ttk.Label(self.root, text="Input Image:").grid(row=0, column=0, padx=5, pady=5, sticky='e')
-        ttk.Entry(self.root, textvariable=self.input_path, width=50).grid(row=0, column=1, padx=5, pady=5)
+        ttk.Entry(self.root, textvariable=self.input_path, width=80).grid(row=0, column=1, padx=5, pady=5)
         ttk.Button(self.root, text="Browse", command=self.browse_input).grid(row=0, column=2, padx=5, pady=5)
 
         # Output Directory Selection
         ttk.Label(self.root, text="Output Directory:").grid(row=1, column=0, padx=5, pady=5, sticky='e')
-        ttk.Entry(self.root, textvariable=self.output_dir, width=50).grid(row=1, column=1, padx=5, pady=5)
+        ttk.Entry(self.root, textvariable=self.output_dir, width=80).grid(row=1, column=1, padx=5, pady=5)
         ttk.Button(self.root, text="Browse", command=self.browse_output).grid(row=1, column=2, padx=5, pady=5)
 
         # Start Index
@@ -82,6 +82,8 @@ class ImageSplitterApp:
             output_dir = os.path.join(self.output_dir.get(), f"C{i+1}")
             os.makedirs(output_dir, exist_ok=True)
             
+            print (self.input_pattern)
+            
             cmd = [
                 'ffmpeg',
                 '-start_number', str(self.start_index.get()),
@@ -90,6 +92,7 @@ class ImageSplitterApp:
                 '-q:v', '1',
                 '-qmin', '1',
                 '-qmax', '1',
+                '-start_number', str(self.start_index.get()),
                 os.path.join(output_dir, self.input_pattern)
             ]
 
