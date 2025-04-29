@@ -6,6 +6,11 @@
 *.mkv
 *.webm
 
+*.png
+*.jpg
+*.jpeg
+*.gif
+
 # Compiled source
 *.com
 *.class
